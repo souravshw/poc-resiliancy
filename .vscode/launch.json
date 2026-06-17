@@ -1,0 +1,44 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Launch API Gateway (8080)",
+            "request": "launch",
+            "mainClass": "com.example.poc.gateway.ApiGatewayApplication",
+            "projectName": "api-gateway"
+        },
+        {
+            "type": "java",
+            "name": "Launch Product Service (8081)",
+            "request": "launch",
+            "mainClass": "com.example.poc.product.ProductServiceApplication",
+            "projectName": "product-service"
+        },
+        {
+            "type": "java",
+            "name": "Launch Cart Service (8082)",
+            "request": "launch",
+            "mainClass": "com.example.poc.cart.CartServiceApplication",
+            "projectName": "cart-service"
+        },
+        {
+            "type": "java",
+            "name": "Launch UI Service (8083)",
+            "request": "launch",
+            "mainClass": "com.example.poc.ui.UiServiceApplication",
+            "projectName": "ui-service"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Launch All Microservices",
+            "configurations": [
+                "Launch Product Service (8081)",
+                "Launch Cart Service (8082)",
+                "Launch UI Service (8083)",
+                "Launch API Gateway (8080)"
+            ]
+        }
+    ]
+}

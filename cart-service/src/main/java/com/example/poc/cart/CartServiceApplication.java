@@ -12,7 +12,7 @@ public class CartServiceApplication {
     }
 
     @Bean
-    public RestClient restClient(RestClient.Builder builder) {
-        return builder.build();
+    public RestClient restClient() {
+        return RestClient.create();
     }
 }
