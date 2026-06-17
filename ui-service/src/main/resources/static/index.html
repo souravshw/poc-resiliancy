@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PocResiliancy - Microservices Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <div class="background-decorations">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="glass-panel main-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i data-lucide="network"></i>
+                </div>
+                <div>
+                    <h1>PocResiliancy</h1>
+                    <p class="subtitle">Microservices Architecture (Gateway, UI, Products, Cart)</p>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="stats-container">
+                <div class="stat-card">
+                    <span class="stat-label">Total Products</span>
+                    <span id="stat-total" class="stat-value">0</span>
+                </div>
+                <div class="stat-card alert-stat">
+                    <span class="stat-label">Low Stock (&lt; 5)</span>
+                    <span id="stat-low-stock" class="stat-value">0</span>
+                </div>
+                <div class="stat-card highlight-stat">
+                    <span class="stat-label">Cart Items</span>
+                    <span id="stat-cart-count" class="stat-value">0</span>
+                </div>
+                <div class="stat-card success-stat">
+                    <span class="stat-label">Cart Total</span>
+                    <span id="stat-cart-total" class="stat-value">$0.00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Grid: 3-column layout -->
+        <main class="dashboard-grid">
+            
+            <!-- Column 1: Product CRUD Form -->
+            <section class="glass-panel form-section">
+                <div class="section-header">
+                    <i data-lucide="plus-circle" id="form-icon"></i>
+                    <h2 id="form-title">Add New Product</h2>
+                </div>
+                
+                <form id="product-form" novalidate>
+                    <input type="hidden" id="product-id">
+                    
+                    <div class="form-group">
+                        <label for="product-name">Product Name</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="package" class="input-icon"></i>
+                            <input type="text" id="product-name" placeholder="e.g. Quantum Processor" required>
+                        </div>
+                        <span class="error-msg" id="name-error"></span>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-category">Category</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="tag" class="input-icon"></i>
+                                <input type="text" id="product-category" placeholder="e.g. Hardware" required>
+                            </div>
+                            <span class="error-msg" id="category-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-row double-col">
+                        <div class="form-group">
+                            <label for="product-price">Price ($)</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="dollar-sign" class="input-icon"></i>
+                                <input type="number" id="product-price" step="0.01" min="0.01" placeholder="99.99" required>
+                            </div>
+                            <span class="error-msg" id="price-error"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="product-quantity">Quantity</label>
+                            <div class="input-wrapper">
+                                <i data-lucide="layers" class="input-icon"></i>
+                                <input type="number" id="product-quantity" min="0" placeholder="10" required>
+                            </div>
+                            <span class="error-msg" id="quantity-error"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="product-description">Description</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="align-left" class="input-icon textarea-icon"></i>
+                            <textarea id="product-description" rows="3" placeholder="Enter product specifications..."></textarea>
+                        </div>
+                        <span class="error-msg" id="description-error"></span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="btn-cancel" class="btn btn-secondary">
+                            <i data-lucide="x"></i> Clear
+                        </button>
+                        <button type="submit" id="btn-submit" class="btn btn-primary">
+                            <i data-lucide="save"></i> Save Product
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Column 2: Products Display (Catalog) -->
+            <section class="catalog-section">
+                <!-- Search and Filters -->
+                <div class="glass-panel search-filter-bar">
+                    <div class="search-wrapper">
+                        <i data-lucide="search" class="search-icon"></i>
+                        <input type="text" id="search-input" placeholder="Search products...">
+                        <button id="search-clear" class="search-clear-btn" style="display: none;">
+                            <i data-lucide="x"></i>
+                        </button>
+                    </div>
+                    <div class="filter-actions">
+                        <button id="btn-refresh" class="btn btn-icon-only" title="Refresh catalog">
+                            <i data-lucide="rotate-cw"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Products Grid Container -->
+                <div id="catalog-container" class="products-grid-container">
+                    <!-- Loading State -->
+                    <div id="loading-spinner" class="loading-state glass-panel">
+                        <div class="spinner"></div>
+                        <p>Syncing product database...</p>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="empty-state" class="empty-state glass-panel" style="display: none;">
+                        <i data-lucide="package-open" class="empty-icon"></i>
+                        <h3>No Products Found</h3>
+                        <p>Add a product in the sidebar panel to fill the inventory.</p>
+                    </div>
+
+                    <!-- Cards Grid -->
+                    <div id="products-grid" class="products-grid"></div>
+                </div>
+            </section>
+
+            <!-- Column 3: Shopping Cart Panel -->
+            <section class="glass-panel cart-section">
+                <div class="section-header">
+                    <i data-lucide="shopping-cart" class="cart-title-icon"></i>
+                    <h2>Shopping Cart</h2>
+                </div>
+
+                <!-- Cart Container -->
+                <div id="cart-container" class="cart-container-inner">
+                    <!-- Loading Cart -->
+                    <div id="cart-loading" class="cart-loading-state" style="display: none;">
+                        <div class="spinner spinner-small"></div>
+                        <span>Syncing cart...</span>
+                    </div>
+
+                    <!-- Empty Cart -->
+                    <div id="cart-empty" class="cart-empty-state">
+                        <i data-lucide="shopping-bag" class="cart-empty-icon"></i>
+                        <p>Your cart is empty</p>
+                        <span class="cart-empty-sub">Add products from the catalog to get started.</span>
+                    </div>
+
+                    <!-- Cart Items List -->
+                    <div id="cart-items" class="cart-items-list"></div>
+
+                    <!-- Cart Summary Footer -->
+                    <div id="cart-summary" class="cart-summary" style="display: none;">
+                        <div class="cart-divider"></div>
+                        <div class="summary-row">
+                            <span>Subtotal</span>
+                            <span id="cart-subtotal-val">$0.00</span>
+                        </div>
+                        <div class="summary-row highlight-row">
+                            <span>Total</span>
+                            <span id="cart-total-val">$0.00</span>
+                        </div>
+                        <div class="cart-actions-row">
+                            <button id="btn-clear-cart" class="btn btn-secondary btn-clear">
+                                <i data-lucide="trash"></i> Clear
+                            </button>
+                            <button id="btn-checkout" class="btn btn-success btn-checkout">
+                                <i data-lucide="credit-card"></i> Checkout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="main-footer-copyright">
+            <p>PocResiliancy &bull; Built with Spring Boot 4.0.0 Microservices &bull; Aggregated API Gateway</p>
+        </footer>
+    </div>
+
+    <!-- Notification Toast System -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Javascript Logic -->
+    <script src="js/app.js"></script>
+</body>
+</html>
